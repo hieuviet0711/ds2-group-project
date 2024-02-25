@@ -56,6 +56,10 @@ plt.tight_layout()
 
 plt.show()
 
+#
+# Other relationships
+#
+
 # Education and ApplicantIncome
 plt.subplot(2, 2, 1)
 sns.boxplot(x='Education', y='ApplicantIncome', data=loan_data_cleaned)
@@ -105,7 +109,7 @@ plt.title('Property_Area vs Loan Status')
 plt.tight_layout()
 plt.show()
 
-# Set up the matplotlib figure
+# More figures
 
 fig, axes = plt.subplots(4, 2, figsize=(14, 20))
 
@@ -160,4 +164,3 @@ axes[3, 1].set_title('ApplicantIncome vs Credit_History')
 plt.tight_layout()
 
 plt.show()
-
