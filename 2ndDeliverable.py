@@ -9,6 +9,11 @@ from sklearn.model_selection import cross_val_score
 from sklearn.model_selection import GridSearchCV
 from sklearn.linear_model import LogisticRegression
 from sklearn.tree import DecisionTreeClassifier
+from sklearn.decomposition import PCA
+from sklearn.tree import plot_tree
+import matplotlib.pyplot as plt
+import seaborn as sns
+import numpy as np
 
 # Load the dataset
 df = pd.read_csv('loan_data.csv')
@@ -68,6 +73,37 @@ print("Variance:", variance)
 
 grid_predictions = grid.predict(X_test)
 print(classification_report(y_test, grid_predictions))
+
+
+# blue is no, red is yes
+# Perform PCA for dimensionality reduction
+pca = PCA(n_components=2)
+X_train_pca = pca.fit_transform(X_train)
+X_test_pca = pca.transform(X_test)
+
+
+model_svm_pca = SVC(random_state=5)
+model_svm_pca.fit(X_train_pca, y_train)
+
+def plot_decision_boundary(model, X, y):
+    h = 0.02 
+    x_min, x_max = X[:, 0].min() - 1, X[:, 0].max() + 1
+    y_min, y_max = X[:, 1].min() - 1, X[:, 1].max() + 1
+    xx, yy = np.meshgrid(np.arange(x_min, x_max, h), np.arange(y_min, y_max, h))
+    Z = model.predict(np.c_[xx.ravel(), yy.ravel()])
+    Z = Z.reshape(xx.shape)
+    plt.contourf(xx, yy, Z, cmap=plt.cm.coolwarm, alpha=0.8)
+    plt.scatter(X[:, 0], X[:, 1], c=y, cmap=plt.cm.coolwarm, s=20, edgecolors='k')
+    plt.xlabel('')
+    plt.ylabel('')
+    plt.title('Decision Boundary')
+
+# Plot decision boundary for SVM with PCA
+plt.figure(figsize=(8, 6))
+plot_decision_boundary(model_svm_pca, X_train_pca, y_train)
+plt.show()
+
+
 print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
 
 
@@ -93,6 +129,24 @@ print("Variance:", variance)
 
 grid_predictions2 = grid2.predict(X_test)
 print(classification_report(y_test, grid_predictions2))
+
+coefficients = model_logreg.coef_[0]
+feature_names = X.columns
+#coefficient data frame
+coefficients_df = pd.DataFrame({'Feature': feature_names, 'Coefficient': coefficients})
+
+# Sort the coefficients by absolute value
+coefficients_df['Abs_Coefficient'] = np.abs(coefficients_df['Coefficient'])
+coefficients_df = coefficients_df.sort_values(by='Abs_Coefficient', ascending=False)
+
+# Plot the coefficients
+plt.figure(figsize=(10, 6))
+sns.barplot(x='Coefficient', y='Feature', data=coefficients_df)
+plt.xlabel('Coefficient')
+plt.ylabel('Feature')
+plt.title('Logistic Regression Coefficients')
+plt.show()
+
 print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
 
 
@@ -119,3 +173,14 @@ print("Variance:", variance)
 grid_predictions3 = grid3.predict(X_test)
 print(classification_report(y_test, grid_predictions3))
 print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
+
+#display decision tree
+from sklearn.tree import plot_tree
+
+model_dectree = DecisionTreeClassifier(random_state=5)
+model_dectree.fit(X_train, y_train)
+
+# Visualize the decision tree
+plt.figure(figsize=(20,10))
+plot_tree(model_dectree, filled=True, feature_names=X.columns, class_names=['No', 'Yes'])
+plt.show()
